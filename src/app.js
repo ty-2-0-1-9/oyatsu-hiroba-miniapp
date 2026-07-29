@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   const config = window.MINI_APP_CONFIG;
   const data = window.MINI_APP_DATA;
   const root = document.getElementById("app-root");
@@ -17,7 +17,12 @@
   };
 
   const productById = new Map(data.products.map((product) => [product.id, product]));
-  const resultEntries = Object.values(data.resultTypes);
+  const validCardIds = new Set(data.cards.map((card) => card.id));
+  const normalizedCards = state.cards.filter((card) => validCardIds.has(card.id));
+  if (normalizedCards.length !== state.cards.length) {
+    state.cards = normalizedCards;
+    writeJson(config.storageKeys.cards, state.cards);
+  }
 
   function todayKey() {
     const now = new Date();
@@ -62,47 +67,11 @@
       .replaceAll("'", "&#039;");
   }
 
-  function productName(productId) {
-    return productById.get(productId)?.name || "おやつ商品";
-  }
-
-  function productImage(productId) {
-    return productById.get(productId)?.image || data.products[0].image;
-  }
-
-  function renderProductShelf() {
-    return `
-      <div class="product-shelf" aria-label="おやつ商品">
-        ${data.products.map((product) => `
-          <article class="product-tile product-tile--${escapeHtml(product.id)}">
-            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}">
-            <div>
-              <strong>${escapeHtml(product.name)}</strong>
-              <span>${escapeHtml(product.category)}</span>
-            </div>
-          </article>
-        `).join("")}
-      </div>
-    `;
-  }
-
-  function gachaStorageKey() {
-    return config.storageKeys.gachaPrefix + todayKey();
-  }
-
-  function getTodayCard() {
-    return readJson(gachaStorageKey(), null);
-  }
 
   function addCard(card) {
     if (!card || state.cards.some((item) => item.id === card.id)) return;
     state.cards.unshift(card);
     writeJson(config.storageKeys.cards, state.cards);
-  }
-
-  function setTodayCard(card) {
-    writeJson(gachaStorageKey(), card);
-    addCard(card);
   }
 
   function isEventMissionDone(missionId) {
@@ -154,15 +123,14 @@
     return `
       <header class="topbar">
         <div class="brand">
-          <p class="brand__eyebrow">${escapeHtml(config.lineChannelLabel)}</p>
-          <h1 class="brand__title">${escapeHtml(config.brandLabel)}</h1>
+          <p class="brand__eyebrow brand__eyebrow--single">${escapeHtml(config.brandLabel)}</p>
         </div>
         <button class="heart-button" type="button" data-view-button="collection" aria-label="ハート残高を見る"><span>♡</span><strong>${state.hearts}</strong></button>
       </header>
     `;
   }
 
-  function renderResultCard(result, origin) {
+  function renderResultCard(result) {
     const product = productById.get(result.productId);
     return `
       <section class="section result-panel result-panel--${escapeHtml(product.id)}">
@@ -179,9 +147,12 @@
             <span style="width:${result.ratio}%"></span>
           </div>
           <small>今日、同じタイプの人は ${escapeHtml(result.ratio)}%</small>
+          <div class="result-heart">
+            <span>♡</span>
+            <div><strong>診断完了で +10ハート</strong><small>ハート残高 ${state.hearts}個</small></div>
+          </div>
           <div class="result-actions">
             <button class="btn btn--primary" type="button" data-view-button="voice">みんなの声を見る</button>
-            <button class="btn" type="button" data-run-gacha>${getTodayCard() ? "今日のカードを見る" : "カードを引く +8ハート"}</button>
           </div>
         </div>
       </section>
@@ -191,7 +162,7 @@
   function renderQuiz() {
     if (state.quizResult) {
       return `
-        ${renderResultCard(data.resultTypes[state.quizResult.id], "quiz")}
+        ${renderResultCard(data.resultTypes[state.quizResult.id])}
         <section class="section">
           <button class="btn btn--block" type="button" data-reset-quiz>診断をやり直す</button>
         </section>
@@ -204,10 +175,9 @@
       <section class="section quiz-intro">
         <div class="quiz-intro__copy">
           <span class="hero-label hero-label--red">Snack mood finder</span>
-          <h2>今日の気分に合うおやつを見つけよう</h2>
-          <p>3つの質問に答えるだけ。診断結果、みんなの投票、カード集めでハートが貯まります。</p>
+          <h2>3つの質問で今日のおやつ気分を診断</h2>
+          <p>診断すると10ハート。投票やひとこと投稿でもハートを貯められます。</p>
         </div>
-        ${renderProductShelf()}
         <div class="heart-teaser">
           <span>♡</span>
           <strong>診断完了で +10ハート</strong>
@@ -254,19 +224,34 @@
       <section class="section word-panel">
         <div class="section__head">
           <h2 class="section__title">みんなのひとこと</h2>
-          <span class="section__meta">20文字くらいで気軽に</span>
+          <span class="section__meta">好きなお菓子と一緒に投稿</span>
         </div>
         <form class="oneword-form" data-oneword-form>
-          <input type="text" name="text" maxlength="28" placeholder="例: 今日はチョコスティック気分" aria-label="ひとことを入力">
-          <button class="btn btn--primary" type="submit">送る</button>
+          <label class="snack-picker">
+            <span>好きなお菓子</span>
+            <select name="productId" required aria-label="好きなお菓子を選択">
+              <option value="" selected disabled>お菓子を選ぶ</option>
+              ${data.products.map((product) => `<option value="${escapeHtml(product.id)}">${escapeHtml(product.name)}</option>`).join("")}
+            </select>
+          </label>
+          <div class="oneword-form__message">
+            <input type="text" name="text" maxlength="28" placeholder="例: 今日はゆっくり楽しみたい" aria-label="ひとことを入力" required>
+            <button class="btn btn--primary" type="submit">送る</button>
+          </div>
         </form>
         <div class="word-list">
-          ${comments.slice(0, 6).map((item) => `
-            <article>
-              <strong>${escapeHtml(item.name)}</strong>
-              <span>${escapeHtml(item.text)}</span>
-            </article>
-          `).join("")}
+          ${comments.slice(0, 6).map((item) => {
+            const product = productById.get(item.productId) || data.products[0];
+            return `
+              <article>
+                <div class="word-list__author">
+                  <strong>${escapeHtml(item.name)}</strong>
+                  <span class="snack-chip"><img src="${escapeHtml(product.image)}" alt="">${escapeHtml(product.name)}</span>
+                </div>
+                <p>${escapeHtml(item.text)}</p>
+              </article>
+            `;
+          }).join("")}
         </div>
       </section>
       <section class="section park-panel compact">
@@ -277,29 +262,31 @@
   }
 
   function renderCollection() {
-    const todayCard = getTodayCard();
-    const ownedIds = new Set(state.cards.map((card) => card.id));
+    const ownedCards = state.cards
+      .map((storedCard) => data.cards.find((card) => card.id === storedCard.id))
+      .filter(Boolean);
     return `
       <section class="section collection-hero">
-        <span class="hero-label hero-label--red">コレクション</span>
-        <h2>${state.hearts} ハート / カード ${state.cards.length}枚</h2><p>毎日1枚ずつ。カードとハートを集めるほど、Webコミュニティへ進む理由が増えていきます。</p>
-        ${renderProductShelf()}
-        <button class="btn btn--primary btn--block" type="button" data-run-gacha>${todayCard ? "今日のカードを見る" : "今日のカードを引く +8ハート"}</button>
+        <span class="hero-label hero-label--red">保有カード</span>
+        <h2>保有数：カード${ownedCards.length}枚　ハート${state.hearts}個</h2>
+        <p>施設やイベントでチェックインすると、参加した体験がカードとして残ります。</p>
       </section>
       <section class="section card-grid">
-        ${data.cards.map((card) => {
-          const owned = ownedIds.has(card.id);
-          return `
-            <article class="collect-card ${owned ? "is-owned" : "is-locked"}">
-              <img src="${escapeHtml(productImage(card.productId))}" alt="${escapeHtml(productName(card.productId))}">
-              <div>
-                <span>${escapeHtml(card.rarity)}</span>
-                <h3>${owned ? escapeHtml(card.title) : "未開放カード"}</h3>
-                <p>${escapeHtml(card.hint)}</p>
-              </div>
-            </article>
-          `;
-        }).join("")}
+        ${ownedCards.length ? ownedCards.map((card) => `
+          <article class="collect-card is-owned experience-card">
+            <div class="experience-card__icon">${escapeHtml(card.icon)}</div>
+            <div>
+              <span>${escapeHtml(card.rarity)}</span>
+              <h3>${escapeHtml(card.title)}</h3>
+              <p>${escapeHtml(card.hint)}</p>
+            </div>
+          </article>
+        `).join("") : `
+          <article class="empty-card-state">
+            <strong>まだ保有カードはありません</strong>
+            <p>「体験」タブからチェックインすると、体験カードが追加されます。</p>
+          </article>
+        `}
       </section>
       <section class="section park-panel">
         <h2>${escapeHtml(config.copy.parkTitle)}</h2><div class="park-heart-line"><strong>${state.hearts}</strong><span>ハートを保持中</span></div><div class="benefit-list">
@@ -313,21 +300,22 @@
   function renderEvent() {
     const completedCount = data.eventCampaign.missions.filter((mission) => isEventMissionDone(mission.id)).length;
     const totalHearts = data.eventCampaign.missions.reduce((sum, mission) => sum + mission.hearts, 0);
-    const voteTotal = data.eventCampaign.voteOptions.reduce((sum, option) => sum + option.count + (isEventMissionDone("vote") && option.id === "process" ? 1 : 0), 0);
+    const surveyDone = isEventMissionDone("survey");
+    const voteTotal = data.eventCampaign.voteOptions.reduce((sum, option) => sum + option.count + (surveyDone && option.id === "process" ? 1 : 0), 0);
     return `
       <section class="section event-hero">
         <div class="event-hero__copy">
-          <span class="hero-label hero-label--red">LINEタッチ入口</span>
+          <span class="hero-label hero-label--red">体験をカードに残す</span>
           <h2>${escapeHtml(data.eventCampaign.title)}</h2>
           <p>${escapeHtml(data.eventCampaign.body)}</p>
         </div>
-        <div class="event-ticket" aria-label="LINEタッチ会場チケット">
+        <div class="event-ticket" aria-label="LINEタッチ体験チケット">
           <span>LINE<br>TOUCH</span>
           <i></i><i></i><i></i><i></i>
         </div>
         <div class="event-summary">
           <span>${escapeHtml(data.eventCampaign.venue)}</span>
-          <strong>${completedCount} / ${data.eventCampaign.missions.length} 完了</strong>
+          <strong>${completedCount} / ${data.eventCampaign.missions.length} クリア</strong>
           <strong>最大 +${totalHearts}ハート</strong>
         </div>
       </section>
@@ -335,14 +323,15 @@
         ${data.eventCampaign.missions.map((mission) => {
           const done = isEventMissionDone(mission.id);
           return `
-            <article class="mission-card ${done ? "is-done" : ""}">
+            <article class="mission-card ${done ? "is-done" : "is-pending"}">
               <div>
-                <span>${done ? "完了" : `+${mission.hearts}ハート`}</span>
+                <span>${done ? "クリア済み" : "未クリア"}</span>
                 <h3>${escapeHtml(mission.title)}</h3>
                 <p>${escapeHtml(mission.description)}</p>
+                <small class="mission-reward">${done ? "受取済み" : `クリアで +${mission.hearts}ハート`}</small>
               </div>
-              <button class="btn ${done ? "" : "btn--primary"}" type="button" data-event-mission="${escapeHtml(mission.id)}" ${done ? "disabled" : ""}>
-                ${done ? "受取済み" : "受け取る"}
+              <button class="btn btn--mission" type="button" data-event-mission="${escapeHtml(mission.id)}" ${done ? "disabled" : ""}>
+                ${done ? "クリア済み" : escapeHtml(mission.buttonLabel)}
               </button>
             </article>
           `;
@@ -350,31 +339,34 @@
       </section>
       <section class="section event-vote-panel">
         <div class="section__head">
-          <h2 class="section__title">会場のみんなの印象</h2>
-          <span class="section__meta">投票後に結果を表示</span>
+          <h2 class="section__title">今日のアンケート結果</h2>
+          <span class="section__meta">回答後に結果を表示</span>
         </div>
-        <div class="event-vote-list">
-          ${data.eventCampaign.voteOptions.map((option) => {
-            const count = option.count + (isEventMissionDone("vote") && option.id === "process" ? 1 : 0);
-            const pct = Math.round((count / voteTotal) * 100);
-            return `
-              <div>
-                <span>${escapeHtml(option.label)}</span>
-                <strong>${pct}%</strong>
-                <i style="width:${pct}%"></i>
-              </div>
-            `;
-          }).join("")}
-        </div>
+        ${surveyDone ? `
+          <div class="event-vote-list">
+            ${data.eventCampaign.voteOptions.map((option) => {
+              const count = option.count + (option.id === "process" ? 1 : 0);
+              const pct = Math.round((count / voteTotal) * 100);
+              return `
+                <div>
+                  <span>${escapeHtml(option.label)}</span>
+                  <strong>${pct}%</strong>
+                  <i style="width:${pct}%"></i>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        ` : `<p class="survey-locked">「今日のアンケート回答」をクリアすると、みんなの回答が表示されます。</p>`}
       </section>
       <section class="section park-panel">
-        <h2>会場の続きはWebコミュニティへ</h2>
-        <p>来場で受け取ったハートと限定カードをきっかけに、帰宅後もWebコミュニティで続きを楽しめます。</p>
+        <h2>体験の続きはWebコミュニティへ</h2>
+        <p>チェックインで受け取ったハートと体験カードをきっかけに、帰宅後も続きを楽しめます。</p>
         <div class="park-heart-line"><strong>${state.hearts}</strong><span>ハートを保持中</span></div>
         <button class="btn btn--primary btn--block" type="button" data-park-link>${escapeHtml(config.parkLink.label)}</button>
       </section>
     `;
   }
+
   function renderBottomNav() {
     return `
       <nav class="bottom-nav" aria-label="メイン">
@@ -411,22 +403,6 @@
     state.quizResult = { id: winner, completedAt: new Date().toISOString() };
     writeJson(config.storageKeys.quizResult, state.quizResult);
     awardHearts("quiz");
-    render();
-  }
-
-  function drawCard() {
-    const existing = getTodayCard();
-    if (existing) {
-      state.activeView = "collection";
-      render();
-      return;
-    }
-    const resultId = state.quizResult?.id;
-    const preferred = data.cards.find((card) => card.productId === resultId && !state.cards.some((owned) => owned.id === card.id));
-    const fallback = data.cards.find((card) => !state.cards.some((owned) => owned.id === card.id)) || data.cards[Math.floor(Math.random() * data.cards.length)];
-    setTodayCard(preferred || fallback);
-    awardHearts("card");
-    state.activeView = "collection";
     render();
   }
 
@@ -472,9 +448,6 @@
       });
     });
 
-    document.querySelectorAll("[data-run-gacha]").forEach((button) => {
-      button.addEventListener("click", drawCard);
-    });
 
     document.querySelectorAll("[data-event-mission]").forEach((button) => {
       button.addEventListener("click", () => completeEventMission(button.dataset.eventMission));
@@ -496,8 +469,9 @@
         event.preventDefault();
         const formData = new FormData(form);
         const text = String(formData.get("text") || "").trim();
-        if (!text) return;
-        state.oneWords.unshift({ name: config.user.displayName, text });
+        const productId = String(formData.get("productId") || "");
+        if (!text || !productById.has(productId)) return;
+        state.oneWords.unshift({ name: config.user.displayName, productId, text });
         writeJson(config.storageKeys.oneWords, state.oneWords);
         awardHearts("oneword");
         render();

@@ -1,4 +1,4 @@
-﻿window.MINI_APP_DATA = {
+window.MINI_APP_DATA = {
   stats: [
     { label: "今日の参加", value: "18,420" },
     { label: "本日の発行ハート", value: "128k" },
@@ -126,45 +126,40 @@
     ]
   },
   oneWords: [
-    { name: "さき", text: "今日はコーヒーと一緒にチョコスティック気分。" },
-    { name: "ハル", text: "家族で分けるならクリームサンドがちょうどいい。" },
-    { name: "Nao", text: "ソルティスティックは作業中でも食べやすい。" }
+    { name: "さき", productId: "chocoStick", text: "今日はコーヒーと一緒にひと息つきたい。" },
+    { name: "ハル", productId: "creamBiscuit", text: "家族とゆっくり楽しみたい気分です。" },
+    { name: "Nao", productId: "saltedStick", text: "作業の合間に気軽につまみたい。" }
   ],
   cards: [
-    { id: "card-chocoStick-break", productId: "chocoStick", title: "チョコスティック休憩カード", rarity: "今日の一枚", hint: "休憩上手な人に届くカード" },
-    { id: "card-saltedStick-talk", productId: "saltedStick", title: "ソルティスティックおしゃべりカード", rarity: "今日の一枚", hint: "会話が生まれるカード" },
-    { id: "card-creamBiscuit-care", productId: "creamBiscuit", title: "クリームサンドやさしさカード", rarity: "今日の一枚", hint: "ほっとする時間のカード" },
-    { id: "card-fluffyCone-treat", productId: "fluffyCone", title: "ふんわりコーンごほうびカード", rarity: "レア", hint: "楽しい気分を足すカード" },
-    { id: "card-lightCookie-light", productId: "lightCookie", title: "ライトクッキーすっきりカード", rarity: "レア", hint: "軽やかな日のカード" },
-    { id: "card-park-heart", productId: "chocoStick", title: "コミュニティ連動カード", rarity: "コミュニティ連動", hint: "続きはWebコミュニティで" },
-    { id: "card-factory-tour", productId: "chocoStick", title: "工場見学チェックインカード", rarity: "会場限定", hint: "工場見学の思い出を持ち帰るカード" },
-    { id: "card-event-live", productId: "saltedStick", title: "イベント参加カード", rarity: "会場限定", hint: "イベント参加で解放されるカード" }
+    { id: "card-facility-checkin", icon: "施設", title: "施設チェックインカード", rarity: "体験記録", hint: "施設を訪れ、LINEタッチでチェックインした記録です。" },
+    { id: "card-factory-checkin", icon: "工場", title: "工場見学チェックインカード", rarity: "見学記念", hint: "工場見学へ参加し、ものづくりに触れた記録です。" },
+    { id: "card-popup-checkin", icon: "POP", title: "ポップアップイベントカード", rarity: "期間限定", hint: "ポップアップイベントへ参加した記録です。" },
+    { id: "card-survey-complete", icon: "回答", title: "今日のアンケート回答カード", rarity: "参加記録", hint: "今日の体験についてアンケートへ回答した記録です。" }
   ],
   heartRules: [
     { id: "quiz", label: "診断完了", hearts: 10, frequency: "1日1回" },
     { id: "vote", label: "投票参加", hearts: 3, frequency: "1日1回" },
     { id: "oneword", label: "ひとこと投稿", hearts: 5, frequency: "1日1回" },
-    { id: "card", label: "カード獲得", hearts: 8, frequency: "1日1回" },
-    { id: "event-checkin", label: "会場チェックイン", hearts: 20, frequency: "会場ごと" },
-    { id: "event-quiz", label: "会場クイズ", hearts: 5, frequency: "会場ごと" },
-    { id: "event-vote", label: "会場投票", hearts: 5, frequency: "会場ごと" },
-    { id: "event-card", label: "限定カード", hearts: 15, frequency: "会場ごと" }
+    { id: "experience-facility", label: "施設チェックイン", hearts: 10, frequency: "会場ごと" },
+    { id: "experience-factory", label: "工場見学チェックイン", hearts: 20, frequency: "会場ごと" },
+    { id: "experience-popup", label: "ポップアップイベントチェックイン", hearts: 15, frequency: "会場ごと" },
+    { id: "experience-survey", label: "今日のアンケート回答", hearts: 5, frequency: "1日1回" }
   ],
   eventCampaign: {
-    title: "工場見学・イベント限定ミッション",
-    body: "会場のLINEタッチから入ると、その場だけのハートとカードが受け取れます。体験後はWebコミュニティで続きを楽しめます。",
-    venue: "工場見学会場 / イベント会場",
+    title: "LINEタッチで体験を記録",
+    body: "施設やイベント会場でチェックインすると、体験の記録カードとハートが受け取れます。",
+    venue: "施設 / 工場見学 / ポップアップイベント",
     missions: [
-      { id: "checkin", actionId: "event-checkin", title: "会場チェックイン", description: "受付や入口のLINEタッチから参加。来場記念ハートを受け取れます。", hearts: 20 },
-      { id: "quiz", actionId: "event-quiz", title: "工場なるほどクイズ", description: "見学中に見つけたポイントに答えるミッションです。", hearts: 5 },
-      { id: "vote", actionId: "event-vote", title: "今日の印象投票", description: "印象に残った体験を選ぶと、みんなの結果が見られます。", hearts: 5 },
-      { id: "card", actionId: "event-card", title: "会場限定カード", description: "現地でしか受け取れないカードをコレクションに追加します。", hearts: 15, cardId: "card-factory-tour" }
+      { id: "facility", actionId: "experience-facility", title: "施設チェックイン", description: "対象施設のLINEタッチからチェックインします。", hearts: 10, cardId: "card-facility-checkin", buttonLabel: "チェックイン" },
+      { id: "factory", actionId: "experience-factory", title: "工場見学チェックイン", description: "工場見学の会場で参加記録を残します。", hearts: 20, cardId: "card-factory-checkin", buttonLabel: "チェックイン" },
+      { id: "popup", actionId: "experience-popup", title: "ポップアップイベントチェックイン", description: "期間限定イベントの会場で参加記録を残します。", hearts: 15, cardId: "card-popup-checkin", buttonLabel: "チェックイン" },
+      { id: "survey", actionId: "experience-survey", title: "今日のアンケート回答", description: "今日のおやつ体験について回答します。", hearts: 5, cardId: "card-survey-complete", buttonLabel: "回答する" }
     ],
     voteOptions: [
-      { id: "process", label: "作る工程", count: 920 },
-      { id: "smell", label: "甘い香り", count: 680 },
-      { id: "history", label: "お菓子づくりの歴史", count: 540 },
-      { id: "gift", label: "おみやげ", count: 730 }
+      { id: "process", label: "新しい発見があった", count: 920 },
+      { id: "smell", label: "おいしさを感じた", count: 680 },
+      { id: "history", label: "誰かに話したくなった", count: 540 },
+      { id: "gift", label: "また参加したい", count: 730 }
     ]
   },
   parkBenefits: [
