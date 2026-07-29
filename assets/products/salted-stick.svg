@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" role="img" aria-label="ソルティスティック">
+  <rect width="240" height="180" fill="#fff9e6"/>
+  <rect x="38" y="22" width="164" height="136" rx="14" fill="#f6c049"/>
+  <path d="M52 42h136v38H52z" fill="#fffdf5"/>
+  <text x="120" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#8a4c12">SALTY STICK</text>
+  <g stroke="#d4832e" stroke-width="7" stroke-linecap="round"><line x1="72" y1="100" x2="72" y2="148"/><line x1="98" y1="94" x2="98" y2="148"/><line x1="124" y1="98" x2="124" y2="148"/><line x1="150" y1="94" x2="150" y2="148"/><line x1="176" y1="100" x2="176" y2="148"/></g>
+</svg>

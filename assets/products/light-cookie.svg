@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" role="img" aria-label="ライトクッキー">
+  <rect width="240" height="180" fill="#effaf4"/>
+  <rect x="50" y="24" width="140" height="132" rx="16" fill="#ffffff" stroke="#89c79b" stroke-width="5"/>
+  <path d="M72 100c28-38 67-38 96 0-7 26-89 26-96 0z" fill="#9ad4aa"/><circle cx="120" cy="82" r="30" fill="#e8f5ec"/>
+  <text x="120" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#217647">LIGHT COOKIE</text>
+  <text x="120" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#217647">light taste</text>
+</svg>

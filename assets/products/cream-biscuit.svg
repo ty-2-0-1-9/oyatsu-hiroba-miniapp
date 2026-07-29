@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" role="img" aria-label="クリームサンド">
+  <rect width="240" height="180" fill="#eef5ff"/>
+  <rect x="40" y="24" width="160" height="132" rx="14" fill="#2f72e8"/>
+  <circle cx="120" cy="106" r="42" fill="#f3c273"/><circle cx="120" cy="106" r="30" fill="#f8dfaa"/>
+  <text x="120" y="64" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#fff">CREAM SAND</text>
+  <text x="120" y="114" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#7a4a16">biscuit</text>
+</svg>
